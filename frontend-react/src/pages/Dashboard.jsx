@@ -24,7 +24,7 @@ const [editId, setEditId] = useState(null);
     try {
 
       const response = await axios.get(
-        "https://taskmanager-fastapi-varsha.onrender.com/tasks"
+       `https://taskmanager-fastapi-varsha.onrender.com/tasks/${editId}`,
       );
 
       setTasks(response.data);
@@ -44,7 +44,7 @@ const [editId, setEditId] = useState(null);
     try {
 
       await axios.post(
-        "https://taskmanager-fastapi-varsha.onrender.com/tasks",
+       `https://taskmanager-fastapi-varsha.onrender.com/tasks/${editId}`,
         {
           title,
           description,
@@ -127,11 +127,12 @@ const [editId, setEditId] = useState(null);
   setAssignedTo(task.assignedTo);
 };
 
-  const filteredTasks = tasks.filter(task =>
-    task.title?.toLowerCase().includes(search.toLowerCase()) ||
-    task.description?.toLowerCase().includes(search.toLowerCase())
-  );
-
+ const filteredTasks = Array.isArray(tasks)
+  ? tasks.filter(task =>
+      task.title?.toLowerCase().includes(search.toLowerCase()) ||
+      task.description?.toLowerCase().includes(search.toLowerCase())
+    )
+  : [];
   const totalTasks = tasks.length;
 
   const pendingTasks = tasks.filter(
