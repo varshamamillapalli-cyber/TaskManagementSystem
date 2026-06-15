@@ -13,7 +13,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-SPRING_BOOT_URL = "http://localhost:8081"
+# Render Spring Boot URL
+SPRING_BOOT_URL = "https://taskmanager-springboot-varsha.onrender.com"
 
 
 class User(BaseModel):
@@ -51,6 +52,15 @@ def add_task(task: Task):
     return response.json()
 
 
+@app.put("/tasks/{id}")
+def update_task(id: int, task: dict):
+    response = requests.put(
+        f"{SPRING_BOOT_URL}/tasks/{id}",
+        json=task
+    )
+    return response.json()
+
+
 @app.delete("/tasks/{id}")
 def delete_task(id: int):
     response = requests.delete(
@@ -65,7 +75,11 @@ def signup(user: User):
         f"{SPRING_BOOT_URL}/auth/signup",
         json=user.dict()
     )
-    return response.text
+
+    try:
+        return response.json()
+    except:
+        return {"message": response.text}
 
 
 @app.post("/auth/login")
@@ -74,13 +88,8 @@ def login(user: User):
         f"{SPRING_BOOT_URL}/auth/login",
         json=user.dict()
     )
-    return response.json()
-@app.put("/tasks/{id}")
-async def update_task(id: int, task: dict):
 
-    response = requests.put(
-        f"http://localhost:8081/tasks/{id}",
-        json=task
-    )
-
-    return response.json()
+    try:
+        return response.json()
+    except:
+        return {"message": response.text}
