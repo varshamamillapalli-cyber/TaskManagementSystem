@@ -1,11 +1,31 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
-
-const API_URL = "https://taskmanager-fastapi-varsha.onrender.com";
+import { useState } from "react";
 
 export default function Dashboard() {
 
-  const [tasks, setTasks] = useState([]);
+  const [tasks, setTasks] = useState([
+    {
+      id: 1,
+      title: "Frontend UI",
+      description: "Create Login Page",
+      status: "Pending",
+      assignedTo: "Frontend Team"
+    },
+    {
+      id: 2,
+      title: "Backend API",
+      description: "Create CRUD APIs",
+      status: "In Progress",
+      assignedTo: "Backend Team"
+    },
+    {
+      id: 3,
+      title: "Testing",
+      description: "Verify APIs",
+      status: "Completed",
+      assignedTo: "QA Team"
+    }
+  ]);
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState("Pending");
@@ -13,118 +33,59 @@ export default function Dashboard() {
   const [search, setSearch] = useState("");
   const [editId, setEditId] = useState(null);
 
-  const role = localStorage.getItem("role") || "ADMIN";
+  const role = "ADMIN";
 
-  useEffect(() => {
-    fetchTasks();
-  }, []);
+  const addTask = () => {
 
-  const fetchTasks = async () => {
-    try {
+    const newTask = {
+      id: tasks.length + 1,
+      title,
+      description,
+      status,
+      assignedTo
+    };
 
-      const response = await axios.get(
-        `${API_URL}/tasks`
-      );
+    setTasks([...tasks, newTask]);
 
-      setTasks(
-        Array.isArray(response.data)
-          ? response.data
-          : []
-      );
+    setTitle("");
+    setDescription("");
+    setStatus("Pending");
+    setAssignedTo("Frontend Team");
 
-    } catch (error) {
-
-      console.log(error);
-      setTasks([]);
-
-    }
+    alert("Task Added Successfully");
   };
 
-  const addTask = async () => {
+  const updateTask = () => {
 
-    if (!title || !description) {
-      alert("Please fill all fields");
-      return;
-    }
+    setTasks(
+      tasks.map(task =>
+        task.id === editId
+          ? {
+              ...task,
+              title,
+              description,
+              status,
+              assignedTo
+            }
+          : task
+      )
+    );
 
-    try {
+    setEditId(null);
 
-      await axios.post(
-        `${API_URL}/tasks`,
-        {
-          title,
-          description,
-          status,
-          assignedTo
-        }
-      );
+    setTitle("");
+    setDescription("");
+    setStatus("Pending");
+    setAssignedTo("Frontend Team");
 
-      alert("Task Added Successfully");
-
-      setTitle("");
-      setDescription("");
-      setStatus("Pending");
-      setAssignedTo("Frontend Team");
-
-      fetchTasks();
-
-    } catch (error) {
-
-      console.log(error);
-      alert("Failed to Add Task");
-
-    }
+    alert("Task Updated Successfully");
   };
 
-  const updateTask = async () => {
+  const deleteTask = (id) => {
 
-    try {
+    setTasks(tasks.filter(task => task.id !== id));
 
-      await axios.put(
-        `${API_URL}/tasks/${editId}`,
-        {
-          title,
-          description,
-          status,
-          assignedTo
-        }
-      );
-
-      alert("Task Updated Successfully");
-
-      setEditId(null);
-
-      setTitle("");
-      setDescription("");
-      setStatus("Pending");
-      setAssignedTo("Frontend Team");
-
-      fetchTasks();
-
-    } catch (error) {
-
-      console.log(error);
-      alert("Update Failed");
-
-    }
-  };
-
-  const deleteTask = async (id) => {
-
-    try {
-
-      await axios.delete(
-        `${API_URL}/tasks/${id}`
-      );
-
-      fetchTasks();
-
-    } catch (error) {
-
-      console.log(error);
-      alert("Delete Failed");
-
-    }
+    alert("Task Deleted Successfully");
   };
 
   const editTask = (task) => {
@@ -135,261 +96,100 @@ export default function Dashboard() {
     setDescription(task.description);
     setStatus(task.status);
     setAssignedTo(task.assignedTo);
-
   };
 
-  const filteredTasks = Array.isArray(tasks)
-    ? tasks.filter(task =>
-        task.title?.toLowerCase().includes(search.toLowerCase()) ||
-        task.description?.toLowerCase().includes(search.toLowerCase())
-      )
-    : [];
-
-  const totalTasks = tasks.length;
-
-  const pendingTasks = tasks.filter(
-    task => task.status === "Pending"
-  ).length;
-
-  const progressTasks = tasks.filter(
-    task => task.status === "In Progress"
-  ).length;
-
-  const completedTasks = tasks.filter(
-    task => task.status === "Completed"
-  ).length;
+  const filteredTasks = tasks.filter(task =>
+    task.title.toLowerCase().includes(search.toLowerCase()) ||
+    task.description.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
+    <div className="container mt-4">
 
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "#0f172a",
-        padding: "30px"
-      }}
-    >
+      <h1>Task Management Dashboard</h1>
 
-      <div className="d-flex justify-content-between align-items-center mb-4">
+      <div className="card p-3 mb-3">
 
-        <h1 className="text-white">
-          Task Management Dashboard
-        </h1>
+        <input
+          className="form-control mb-2"
+          placeholder="Task Title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
 
-        <span className="badge bg-success p-2">
-          {role}
-        </span>
+        <input
+          className="form-control mb-2"
+          placeholder="Description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
 
-      </div>
-
-      <div className="row mb-4">
-
-        <div className="col-md-3">
-          <div className="card bg-primary text-white shadow">
-            <div className="card-body text-center">
-              <h5>Total Tasks</h5>
-              <h2>{totalTasks}</h2>
-            </div>
-          </div>
-        </div>
-
-        <div className="col-md-3">
-          <div className="card bg-warning text-white shadow">
-            <div className="card-body text-center">
-              <h5>Pending</h5>
-              <h2>{pendingTasks}</h2>
-            </div>
-          </div>
-        </div>
-
-        <div className="col-md-3">
-          <div className="card bg-info text-white shadow">
-            <div className="card-body text-center">
-              <h5>In Progress</h5>
-              <h2>{progressTasks}</h2>
-            </div>
-          </div>
-        </div>
-
-        <div className="col-md-3">
-          <div className="card bg-success text-white shadow">
-            <div className="card-body text-center">
-              <h5>Completed</h5>
-              <h2>{completedTasks}</h2>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      <div className="card shadow p-4 mb-4">
-
-        <h3 className="mb-3">
-          {editId ? "Update Task" : "Add New Task"}
-        </h3>
-
-        <div className="row">
-
-          <div className="col-md-3">
-            <input
-              className="form-control"
-              placeholder="Task Title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-          </div>
-
-          <div className="col-md-3">
-            <input
-              className="form-control"
-              placeholder="Description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </div>
-
-          <div className="col-md-2">
-            <select
-              className="form-control"
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-            >
-              <option>Pending</option>
-              <option>In Progress</option>
-              <option>Completed</option>
-            </select>
-          </div>
-
-          <div className="col-md-2">
-            <select
-              className="form-control"
-              value={assignedTo}
-              onChange={(e) => setAssignedTo(e.target.value)}
-            >
-              <option>Frontend Team</option>
-              <option>Backend Team</option>
-              <option>QA Team</option>
-            </select>
-          </div>
-
-          <div className="col-md-2">
-
-            {role === "ADMIN" && (
-
-              editId ? (
-
-                <button
-                  className="btn btn-success w-100"
-                  onClick={updateTask}
-                >
-                  Update Task
-                </button>
-
-              ) : (
-
-                <button
-                  className="btn btn-primary w-100"
-                  onClick={addTask}
-                >
-                  Add Task
-                </button>
-
-              )
-
-            )}
-
-          </div>
-
-        </div>
+        <button
+          className="btn btn-primary"
+          onClick={editId ? updateTask : addTask}
+        >
+          {editId ? "Update Task" : "Add Task"}
+        </button>
 
       </div>
 
       <input
-        className="form-control mb-4"
-        placeholder="Search Tasks..."
+        className="form-control mb-3"
+        placeholder="Search Tasks"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
 
-      <div className="card shadow">
+      <table className="table table-bordered">
 
-        <div className="card-body">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Status</th>
+            <th>Team</th>
+            <th>Action</th>
+          </tr>
+        </thead>
 
-          <table className="table table-striped">
+        <tbody>
 
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Title</th>
-                <th>Description</th>
-                <th>Status</th>
-                <th>Team</th>
-                <th>Action</th>
-              </tr>
-            </thead>
+          {filteredTasks.map(task => (
 
-            <tbody>
+            <tr key={task.id}>
 
-              {filteredTasks.map(task => (
+              <td>{task.id}</td>
+              <td>{task.title}</td>
+              <td>{task.description}</td>
+              <td>{task.status}</td>
+              <td>{task.assignedTo}</td>
 
-                <tr key={task.id}>
+              <td>
 
-                  <td>{task.id}</td>
-                  <td>{task.title}</td>
-                  <td>{task.description}</td>
+                <button
+                  className="btn btn-warning btn-sm me-2"
+                  onClick={() => editTask(task)}
+                >
+                  Edit
+                </button>
 
-                  <td>
-                    <span
-                      className={
-                        task.status === "Completed"
-                          ? "badge bg-success"
-                          : task.status === "In Progress"
-                          ? "badge bg-info"
-                          : "badge bg-warning"
-                      }
-                    >
-                      {task.status}
-                    </span>
-                  </td>
+                <button
+                  className="btn btn-danger btn-sm"
+                  onClick={() => deleteTask(task.id)}
+                >
+                  Delete
+                </button>
 
-                  <td>{task.assignedTo}</td>
+              </td>
 
-                  <td>
+            </tr>
 
-                    {role === "ADMIN" && (
+          ))}
 
-                      <div className="d-flex gap-2">
+        </tbody>
 
-                        <button
-                          className="btn btn-warning btn-sm"
-                          onClick={() => editTask(task)}
-                        >
-                          Edit
-                        </button>
-
-                        <button
-                          className="btn btn-danger btn-sm"
-                          onClick={() => deleteTask(task.id)}
-                        >
-                          Delete
-                        </button>
-
-                      </div>
-
-                    )}
-
-                  </td>
-
-                </tr>
-
-              ))}
-
-            </tbody>
-
-          </table>
-
-        </div>
-
-      </div>
+      </table>
 
     </div>
   );
