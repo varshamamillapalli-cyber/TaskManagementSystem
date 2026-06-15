@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
+const API_URL = "https://taskmanagementsystem-gszt.onrender.com";
+
 export default function Comments() {
 
   const [comments, setComments] = useState([]);
@@ -12,38 +14,68 @@ export default function Comments() {
   }, []);
 
   const fetchComments = async () => {
+    try {
 
-    const response =
-      await axios.get(
-        "http://localhost:5000/comments"
+      const response = await axios.get(
+        `${API_URL}/comments`
       );
 
-    setComments(response.data);
+      setComments(response.data);
+
+    } catch (error) {
+
+      console.log(error);
+
+      alert("Failed to load comments");
+    }
   };
 
   const addComment = async () => {
 
-    await axios.post(
-      "http://localhost:5000/comments",
-      {
-        username,
-        comment
-      }
-    );
+    if (!username || !comment) {
+      alert("Please enter username and comment");
+      return;
+    }
 
-    setUsername("");
-    setComment("");
+    try {
 
-    fetchComments();
+      await axios.post(
+        `${API_URL}/comments`,
+        {
+          username,
+          comment
+        }
+      );
+
+      setUsername("");
+      setComment("");
+
+      fetchComments();
+
+    } catch (error) {
+
+      console.log(error);
+
+      alert("Failed to add comment");
+    }
   };
 
   const deleteComment = async (id) => {
 
-    await axios.delete(
-      `http://localhost:5000/comments/${id}`
-    );
+    try {
 
-    fetchComments();
+      await axios.delete(
+        `${API_URL}/comments/${id}`
+      );
+
+      fetchComments();
+
+    } catch (error) {
+
+      console.log(error);
+
+      alert("Failed to delete comment");
+    }
   };
 
   return (
@@ -55,14 +87,14 @@ export default function Comments() {
         className="form-control mb-2"
         placeholder="Username"
         value={username}
-        onChange={(e)=>setUsername(e.target.value)}
+        onChange={(e) => setUsername(e.target.value)}
       />
 
       <textarea
         className="form-control mb-2"
         placeholder="Comment"
         value={comment}
-        onChange={(e)=>setComment(e.target.value)}
+        onChange={(e) => setComment(e.target.value)}
       />
 
       <button
@@ -84,7 +116,7 @@ export default function Comments() {
 
         <tbody>
 
-          {comments.map(c => (
+          {comments.map((c) => (
 
             <tr key={c._id}>
 
@@ -96,9 +128,7 @@ export default function Comments() {
 
                 <button
                   className="btn btn-danger btn-sm"
-                  onClick={() =>
-                    deleteComment(c._id)
-                  }
+                  onClick={() => deleteComment(c._id)}
                 >
                   Delete
                 </button>
