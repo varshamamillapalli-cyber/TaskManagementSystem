@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
+const API_URL = "https://taskmanager-fastapi-varsha.onrender.com";
 export default function Dashboard() {
 
   const [tasks, setTasks] = useState([]);
@@ -23,7 +24,7 @@ const [editId, setEditId] = useState(null);
     try {
 
       const response = await axios.get(
-        "http://127.0.0.1:8000/tasks"
+        "https://taskmanager-fastapi-varsha.onrender.com"
       );
 
       setTasks(response.data);
@@ -43,7 +44,7 @@ const [editId, setEditId] = useState(null);
     try {
 
       await axios.post(
-        "http://127.0.0.1:8000/tasks",
+        "https://taskmanager-fastapi-varsha.onrender.com",
         {
           title,
           description,
@@ -72,7 +73,7 @@ const [editId, setEditId] = useState(null);
   try {
 
     await axios.put(
-      `http://127.0.0.1:8000/tasks/${editId}`,
+      `https://taskmanager-fastapi-varsha.onrender.com/tasks${editId}`,
       {
         title,
         description,
@@ -105,7 +106,7 @@ const [editId, setEditId] = useState(null);
     try {
 
       await axios.delete(
-        `http://127.0.0.1:8000/tasks/${id}`
+        `https://taskmanager-fastapi-varsha.onrender.com/tasks/${id}`
       );
 
       fetchTasks();
