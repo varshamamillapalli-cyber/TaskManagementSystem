@@ -1,7 +1,4 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
-
-const API_URL = "https://taskmanagementsystem-gszt.onrender.com";
 
 export default function Comments() {
 
@@ -13,88 +10,76 @@ export default function Comments() {
     fetchComments();
   }, []);
 
-  const fetchComments = async () => {
-    try {
+  const fetchComments = () => {
 
-      const response = await axios.get(
-        `${API_URL}/comments`
-      );
+    setComments([
+      {
+        _id: "62adac86d3d6dcc882b2cb58",
+        username: "varsha",
+        comment: "review completed"
+      },
+      {
+        _id: "62ff4ee3822fd52570b6f7b",
+        username: "harshitha",
+        comment: "review completed"
+      }
+    ]);
 
-      setComments(response.data);
-
-    } catch (error) {
-
-      console.log(error);
-
-      alert("Failed to load comments");
-    }
   };
 
-  const addComment = async () => {
+  const addComment = () => {
 
     if (!username || !comment) {
-      alert("Please enter username and comment");
+      alert("Please fill all fields");
       return;
     }
 
-    try {
+    const newComment = {
+      _id: Date.now().toString(),
+      username,
+      comment
+    };
 
-      await axios.post(
-        `${API_URL}/comments`,
-        {
-          username,
-          comment
-        }
-      );
+    setComments([...comments, newComment]);
 
-      setUsername("");
-      setComment("");
+    setUsername("");
+    setComment("");
 
-      fetchComments();
-
-    } catch (error) {
-
-      console.log(error);
-
-      alert("Failed to add comment");
-    }
+    alert("Comment Added Successfully");
   };
 
-  const deleteComment = async (id) => {
+  const deleteComment = (id) => {
 
-    try {
+    setComments(
+      comments.filter(c => c._id !== id)
+    );
 
-      await axios.delete(
-        `${API_URL}/comments/${id}`
-      );
-
-      fetchComments();
-
-    } catch (error) {
-
-      console.log(error);
-
-      alert("Failed to delete comment");
-    }
+    alert("Comment Deleted Successfully");
   };
 
   return (
     <div className="container mt-5">
 
-      <h1>Comments Module</h1>
+      <h1 className="mb-4">
+        Comments Module
+      </h1>
 
       <input
-        className="form-control mb-2"
+        className="form-control mb-3"
         placeholder="Username"
         value={username}
-        onChange={(e) => setUsername(e.target.value)}
+        onChange={(e) =>
+          setUsername(e.target.value)
+        }
       />
 
       <textarea
-        className="form-control mb-2"
+        className="form-control mb-3"
         placeholder="Comment"
         value={comment}
-        onChange={(e) => setComment(e.target.value)}
+        onChange={(e) =>
+          setComment(e.target.value)
+        }
       />
 
       <button
@@ -128,7 +113,9 @@ export default function Comments() {
 
                 <button
                   className="btn btn-danger btn-sm"
-                  onClick={() => deleteComment(c._id)}
+                  onClick={() =>
+                    deleteComment(c._id)
+                  }
                 >
                   Delete
                 </button>
