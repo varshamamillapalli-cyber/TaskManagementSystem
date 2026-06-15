@@ -24,7 +24,7 @@ const [editId, setEditId] = useState(null);
     try {
 
       const response = await axios.get(
-        "https://taskmanager-fastapi-varsha.onrender.com"
+        "https://taskmanager-fastapi-varsha.onrender.com/tasks"
       );
 
       setTasks(response.data);
@@ -44,7 +44,7 @@ const [editId, setEditId] = useState(null);
     try {
 
       await axios.post(
-        "https://taskmanager-fastapi-varsha.onrender.com",
+        "https://taskmanager-fastapi-varsha.onrender.com/tasks",
         {
           title,
           description,
