@@ -2,17 +2,16 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 
 const API_URL = "https://taskmanager-fastapi-varsha.onrender.com";
+
 export default function Dashboard() {
 
   const [tasks, setTasks] = useState([]);
-
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState("Pending");
   const [assignedTo, setAssignedTo] = useState("Frontend Team");
-
- const [search, setSearch] = useState("");
-const [editId, setEditId] = useState(null);
+  const [search, setSearch] = useState("");
+  const [editId, setEditId] = useState(null);
 
   const role = localStorage.getItem("role") || "ADMIN";
 
@@ -22,15 +21,19 @@ const [editId, setEditId] = useState(null);
 
   const fetchTasks = async () => {
     try {
-
       const response = await axios.get(
-       `https://taskmanager-fastapi-varsha.onrender.com/tasks/${editId}`,
+        `${API_URL}/tasks`
       );
 
-      setTasks(response.data);
+      setTasks(
+        Array.isArray(response.data)
+          ? response.data
+          : []
+      );
 
     } catch (error) {
       console.log(error);
+      setTasks([]);
     }
   };
 
@@ -44,7 +47,7 @@ const [editId, setEditId] = useState(null);
     try {
 
       await axios.post(
-       `https://taskmanager-fastapi-varsha.onrender.com/tasks/${editId}`,
+        `${API_URL}/tasks`,
         {
           title,
           description,
@@ -65,48 +68,54 @@ const [editId, setEditId] = useState(null);
     } catch (error) {
 
       console.log(error);
+
       alert("Failed to Add Task");
     }
   };
+
   const updateTask = async () => {
 
-  try {
+    if (!editId) {
+      alert("Please select a task to edit");
+      return;
+    }
 
-    await axios.put(
-      `https://taskmanager-fastapi-varsha.onrender.com/tasks${editId}`,
-      {
-        title,
-        description,
-        status,
-        assignedTo
-      }
-    );
+    try {
 
-    alert("Task Updated Successfully");
+      await axios.put(
+        `${API_URL}/tasks/${editId}`,
+        {
+          title,
+          description,
+          status,
+          assignedTo
+        }
+      );
 
-    setEditId(null);
+      alert("Task Updated Successfully");
 
-    setTitle("");
-    setDescription("");
-    setStatus("Pending");
-    setAssignedTo("Frontend Team");
+      setEditId(null);
+      setTitle("");
+      setDescription("");
+      setStatus("Pending");
+      setAssignedTo("Frontend Team");
 
-    fetchTasks();
+      fetchTasks();
 
-  } catch (error) {
+    } catch (error) {
 
-    console.log(error);
+      console.log(error);
 
-    alert("Update Failed");
-  }
-};
+      alert("Update Failed");
+    }
+  };
 
   const deleteTask = async (id) => {
 
     try {
 
       await axios.delete(
-        `https://taskmanager-fastapi-varsha.onrender.com/tasks/${id}`
+        `${API_URL}/tasks/${id}`
       );
 
       fetchTasks();
@@ -114,41 +123,40 @@ const [editId, setEditId] = useState(null);
     } catch (error) {
 
       console.log(error);
+
       alert("Delete Failed");
     }
   };
+
   const editTask = (task) => {
 
-  setEditId(task.id);
+    setEditId(task.id);
+    setTitle(task.title);
+    setDescription(task.description);
+    setStatus(task.status);
+    setAssignedTo(task.assignedTo);
+  };
 
-  setTitle(task.title);
-  setDescription(task.description);
-  setStatus(task.status);
-  setAssignedTo(task.assignedTo);
-};
+  const filteredTasks = Array.isArray(tasks)
+    ? tasks.filter(task =>
+        task.title?.toLowerCase().includes(search.toLowerCase()) ||
+        task.description?.toLowerCase().includes(search.toLowerCase())
+      )
+    : [];
 
- const filteredTasks = Array.isArray(tasks)
-  ? tasks.filter(task =>
-      task.title?.toLowerCase().includes(search.toLowerCase()) ||
-      task.description?.toLowerCase().includes(search.toLowerCase())
-    )
-  : [];
-  const totalTasks = tasks.length;
+  const totalTasks = filteredTasks.length;
 
-  const pendingTasks = tasks.filter(
+  const pendingTasks = filteredTasks.filter(
     task => task.status === "Pending"
   ).length;
 
-  const progressTasks = tasks.filter(
+  const progressTasks = filteredTasks.filter(
     task => task.status === "In Progress"
   ).length;
 
-  const completedTasks = tasks.filter(
+  const completedTasks = filteredTasks.filter(
     task => task.status === "Completed"
   ).length;
-  
-
-
 
   return (
 
@@ -171,8 +179,6 @@ const [editId, setEditId] = useState(null);
         </span>
 
       </div>
-
-      {/* Statistics */}
 
       <div className="row mb-4">
 
@@ -214,12 +220,10 @@ const [editId, setEditId] = useState(null);
 
       </div>
 
-      {/* Add Task */}
-
       <div className="card shadow p-4 mb-4">
 
         <h3 className="mb-3">
-          Add New Task
+          {editId ? "Edit Task" : "Add New Task"}
         </h3>
 
         <div className="row">
@@ -229,9 +233,7 @@ const [editId, setEditId] = useState(null);
               className="form-control"
               placeholder="Task Title"
               value={title}
-              onChange={(e) =>
-                setTitle(e.target.value)
-              }
+              onChange={(e) => setTitle(e.target.value)}
             />
           </div>
 
@@ -240,9 +242,7 @@ const [editId, setEditId] = useState(null);
               className="form-control"
               placeholder="Description"
               value={description}
-              onChange={(e) =>
-                setDescription(e.target.value)
-              }
+              onChange={(e) => setDescription(e.target.value)}
             />
           </div>
 
@@ -250,9 +250,7 @@ const [editId, setEditId] = useState(null);
             <select
               className="form-control"
               value={status}
-              onChange={(e) =>
-                setStatus(e.target.value)
-              }
+              onChange={(e) => setStatus(e.target.value)}
             >
               <option>Pending</option>
               <option>In Progress</option>
@@ -264,9 +262,7 @@ const [editId, setEditId] = useState(null);
             <select
               className="form-control"
               value={assignedTo}
-              onChange={(e) =>
-                setAssignedTo(e.target.value)
-              }
+              onChange={(e) => setAssignedTo(e.target.value)}
             >
               <option>Frontend Team</option>
               <option>Backend Team</option>
@@ -278,35 +274,30 @@ const [editId, setEditId] = useState(null);
 
             {role === "ADMIN" && (
 
-  editId ? (
+              <button
+                className={`btn w-100 ${
+                  editId
+                    ? "btn-success"
+                    : "btn-primary"
+                }`}
+                onClick={
+                  editId
+                    ? updateTask
+                    : addTask
+                }
+              >
+                {editId
+                  ? "Update Task"
+                  : "Add Task"}
+              </button>
 
-    <button
-      className="btn btn-success w-100"
-      onClick={updateTask}
-    >
-      Update Task
-    </button>
-
-  ) : (
-
-    <button
-      className="btn btn-primary w-100"
-      onClick={addTask}
-    >
-      Add Task
-    </button>
-
-  )
-
-)}
+            )}
 
           </div>
 
         </div>
 
       </div>
-
-      {/* Search */}
 
       <input
         className="form-control mb-4"
@@ -317,8 +308,6 @@ const [editId, setEditId] = useState(null);
         }
       />
 
-      {/* Table */}
-
       <div className="card shadow">
 
         <div className="card-body">
@@ -326,7 +315,6 @@ const [editId, setEditId] = useState(null);
           <table className="table table-striped">
 
             <thead>
-
               <tr>
                 <th>ID</th>
                 <th>Title</th>
@@ -335,7 +323,6 @@ const [editId, setEditId] = useState(null);
                 <th>Team</th>
                 <th>Action</th>
               </tr>
-
             </thead>
 
             <tbody>
@@ -345,13 +332,10 @@ const [editId, setEditId] = useState(null);
                 <tr key={task.id}>
 
                   <td>{task.id}</td>
-
                   <td>{task.title}</td>
-
                   <td>{task.description}</td>
 
                   <td>
-
                     <span
                       className={
                         task.status === "Completed"
@@ -363,34 +347,33 @@ const [editId, setEditId] = useState(null);
                     >
                       {task.status}
                     </span>
-
                   </td>
 
                   <td>{task.assignedTo}</td>
 
                   <td>
 
-                   {role === "ADMIN" && (
+                    {role === "ADMIN" && (
 
-  <div className="d-flex gap-2">
+                      <div className="d-flex gap-2">
 
-    <button
-      className="btn btn-warning btn-sm"
-      onClick={() => editTask(task)}
-    >
-      Edit
-    </button>
+                        <button
+                          className="btn btn-warning btn-sm"
+                          onClick={() => editTask(task)}
+                        >
+                          Edit
+                        </button>
 
-    <button
-      className="btn btn-danger btn-sm"
-      onClick={() => deleteTask(task.id)}
-    >
-      Delete
-    </button>
+                        <button
+                          className="btn btn-danger btn-sm"
+                          onClick={() => deleteTask(task.id)}
+                        >
+                          Delete
+                        </button>
 
-  </div>
+                      </div>
 
-)}
+                    )}
 
                   </td>
 
