@@ -46,7 +46,9 @@ app.post("/comments", async (req, res) => {
 
     res.json(comment);
 });
-
+app.get("/", (req, res) => {
+  res.send("Node.js Backend Running Successfully");
+});
 // DELETE COMMENT
 app.delete("/comments/:id", async (req, res) => {
 
