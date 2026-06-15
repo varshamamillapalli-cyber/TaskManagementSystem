@@ -7,64 +7,101 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// MongoDB Connection
-mongoose.connect("mongodb://127.0.0.1:27017/taskcomments")
+// MongoDB Atlas Connection
+mongoose.connect(
+  process.env.MONGO_URI
+)
 .then(() => {
-    console.log("MongoDB Connected");
+  console.log("MongoDB Atlas Connected");
 })
 .catch((err) => {
-    console.log(err);
+  console.log("MongoDB Error:", err);
 });
 
 // Comment Schema
 const CommentSchema = new mongoose.Schema({
-    username: String,
-    comment: String
+  username: String,
+  comment: String
 });
 
 // Model
 const Comment = mongoose.model(
-    "Comment",
-    CommentSchema
+  "Comment",
+  CommentSchema
 );
 
-// GET ALL COMMENTS
+// Home Route
+app.get("/", (req, res) => {
+  res.send("Node.js Backend Running Successfully");
+});
+
+// Get All Comments
 app.get("/comments", async (req, res) => {
+  try {
 
     const comments = await Comment.find();
 
     res.json(comments);
+
+  } catch (error) {
+
+    res.status(500).json({
+      error: error.message
+    });
+
+  }
 });
 
-// ADD COMMENT
+// Add Comment
 app.post("/comments", async (req, res) => {
 
+  try {
+
     const comment = await Comment.create({
-        username: req.body.username,
-        comment: req.body.comment
+      username: req.body.username,
+      comment: req.body.comment
     });
 
     res.json(comment);
+
+  } catch (error) {
+
+    res.status(500).json({
+      error: error.message
+    });
+
+  }
 });
-app.get("/", (req, res) => {
-  res.send("Node.js Backend Running Successfully");
-});
-// DELETE COMMENT
+
+// Delete Comment
 app.delete("/comments/:id", async (req, res) => {
 
+  try {
+
     await Comment.findByIdAndDelete(
-        req.params.id
+      req.params.id
     );
 
     res.json({
-        message: "Comment Deleted"
+      message: "Comment Deleted"
     });
+
+  } catch (error) {
+
+    res.status(500).json({
+      error: error.message
+    });
+
+  }
 });
 
 // Start Server
-app.listen(5000, () => {
+const PORT = process.env.PORT || 5000;
 
-    console.log(
-        "Node Server Running on Port 5000"
-    );
+app.listen(PORT, () => {
+
+  console.log(
+    `Node Server Running on Port ${PORT}`
+  );
+
 });
