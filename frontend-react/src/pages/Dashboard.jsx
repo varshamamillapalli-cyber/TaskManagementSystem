@@ -21,6 +21,7 @@ export default function Dashboard() {
 
   const fetchTasks = async () => {
     try {
+
       const response = await axios.get(
         `${API_URL}/tasks`
       );
@@ -32,8 +33,10 @@ export default function Dashboard() {
       );
 
     } catch (error) {
+
       console.log(error);
       setTasks([]);
+
     }
   };
 
@@ -68,17 +71,12 @@ export default function Dashboard() {
     } catch (error) {
 
       console.log(error);
-
       alert("Failed to Add Task");
+
     }
   };
 
   const updateTask = async () => {
-
-    if (!editId) {
-      alert("Please select a task to edit");
-      return;
-    }
 
     try {
 
@@ -95,6 +93,7 @@ export default function Dashboard() {
       alert("Task Updated Successfully");
 
       setEditId(null);
+
       setTitle("");
       setDescription("");
       setStatus("Pending");
@@ -105,8 +104,8 @@ export default function Dashboard() {
     } catch (error) {
 
       console.log(error);
-
       alert("Update Failed");
+
     }
   };
 
@@ -123,18 +122,20 @@ export default function Dashboard() {
     } catch (error) {
 
       console.log(error);
-
       alert("Delete Failed");
+
     }
   };
 
   const editTask = (task) => {
 
     setEditId(task.id);
+
     setTitle(task.title);
     setDescription(task.description);
     setStatus(task.status);
     setAssignedTo(task.assignedTo);
+
   };
 
   const filteredTasks = Array.isArray(tasks)
@@ -144,17 +145,17 @@ export default function Dashboard() {
       )
     : [];
 
-  const totalTasks = filteredTasks.length;
+  const totalTasks = tasks.length;
 
-  const pendingTasks = filteredTasks.filter(
+  const pendingTasks = tasks.filter(
     task => task.status === "Pending"
   ).length;
 
-  const progressTasks = filteredTasks.filter(
+  const progressTasks = tasks.filter(
     task => task.status === "In Progress"
   ).length;
 
-  const completedTasks = filteredTasks.filter(
+  const completedTasks = tasks.filter(
     task => task.status === "Completed"
   ).length;
 
@@ -223,7 +224,7 @@ export default function Dashboard() {
       <div className="card shadow p-4 mb-4">
 
         <h3 className="mb-3">
-          {editId ? "Edit Task" : "Add New Task"}
+          {editId ? "Update Task" : "Add New Task"}
         </h3>
 
         <div className="row">
@@ -274,22 +275,25 @@ export default function Dashboard() {
 
             {role === "ADMIN" && (
 
-              <button
-                className={`btn w-100 ${
-                  editId
-                    ? "btn-success"
-                    : "btn-primary"
-                }`}
-                onClick={
-                  editId
-                    ? updateTask
-                    : addTask
-                }
-              >
-                {editId
-                  ? "Update Task"
-                  : "Add Task"}
-              </button>
+              editId ? (
+
+                <button
+                  className="btn btn-success w-100"
+                  onClick={updateTask}
+                >
+                  Update Task
+                </button>
+
+              ) : (
+
+                <button
+                  className="btn btn-primary w-100"
+                  onClick={addTask}
+                >
+                  Add Task
+                </button>
+
+              )
 
             )}
 
@@ -303,9 +307,7 @@ export default function Dashboard() {
         className="form-control mb-4"
         placeholder="Search Tasks..."
         value={search}
-        onChange={(e) =>
-          setSearch(e.target.value)
-        }
+        onChange={(e) => setSearch(e.target.value)}
       />
 
       <div className="card shadow">
